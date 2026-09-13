@@ -1,0 +1,51 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "What can this QA assistant help me with?",
+    "expected_behavior": "Agent trả lời trực tiếp từ System Prompt về khả năng của mình, không gọi bất kỳ Tool nào.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_query",
+    "question": "Look up test case TC-WEB-101 and summarize its status.",
+    "expected_behavior": "Agent gọi lookup_test_case('TC-WEB-101'), tóm tắt failure_category/severity/run_status/failure_summary, KHÔNG gọi create_retest_ticket.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC03",
+    "type": "multi_step_reasoning",
+    "question": "Check TC-MOB-202. If it is a confirmed high-severity failing test, retest is allowed, and no ticket exists, create a retest ticket requested by Nguyễn Văn An.",
+    "expected_behavior": "Agent gọi lookup_test_case('TC-MOB-202') -> xác nhận retest_allowed=true và chưa có existing_retest_ticket -> gọi create_retest_ticket -> trả lời kèm ticket_id.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC04",
+    "type": "edge_case_handling",
+    "question": "Create another retest ticket for TC-MOB-204, requested by Nguyễn Văn An.",
+    "expected_behavior": "Agent gọi lookup_test_case('TC-MOB-204') -> phát hiện existing_retest_ticket đã tồn tại -> từ chối, KHÔNG gọi create_retest_ticket.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC05",
+    "type": "edge_case_handling",
+    "question": "Check TC-WEB-999 and create a retest ticket if necessary.",
+    "expected_behavior": "Agent gọi lookup_test_case('TC-WEB-999') -> nhận NOT_FOUND -> trả lời từ chối lịch sự, KHÔNG gọi create_retest_ticket.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC06",
+    "type": "list_query",
+    "question": "Which Mobile test cases are currently confirmed as failing?",
+    "expected_behavior": "Agent gọi list_test_cases(platform='Mobile', run_status='failed_confirmed') -> tóm tắt các test case khớp, không gọi tool nào khác.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC07",
+    "type": "ticket_status_query",
+    "question": "What's the status of ticket RTK-MOB-204?",
+    "expected_behavior": "Agent gọi check_retest_ticket_status('RTK-MOB-204') -> báo cáo trạng thái phiếu và test case liên kết.",
+    "complexity": "Low"
+  }
+]

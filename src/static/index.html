@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web QA ReAct Explorer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">QA</span>
+      <div>
+        <div class="brand-title">Web QA ReAct Explorer</div>
+        <div class="brand-sub">Test Case Discovery · Agent Workspace · Execution Trace</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="provider-badge" class="status-badge">Đang đọc cấu hình…</span>
+      <span id="run-badge" class="status-badge status-muted">Chưa có run</span>
+      <button id="reset-btn" class="ghost-btn" type="button">↺ Reset mock data</button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="panel explorer-panel" aria-label="Test Case Explorer">
+      <div class="panel-heading">
+        <div><p class="eyebrow">Discover</p><h2>Test Case Explorer</h2></div>
+        <span id="results-count" class="count-badge">0</span>
+      </div>
+
+      <label class="field-label" for="case-search">Tìm theo mô tả, lỗi hoặc mã</label>
+      <input id="case-search" class="field" type="search" placeholder="Ví dụ: nút xác nhận đơn hàng">
+
+      <div class="filter-grid">
+        <label><span>Platform</span><select id="platform-filter" class="field">
+          <option value="">Tất cả</option><option value="Web">Web</option><option value="Mobile">Mobile</option>
+        </select></label>
+        <label><span>Status</span><select id="status-filter" class="field">
+          <option value="">Tất cả</option><option value="failed_confirmed">Failed confirmed</option>
+          <option value="under_investigation">Under investigation</option><option value="passed">Passed</option><option value="flaky">Flaky</option>
+        </select></label>
+        <label><span>Severity</span><select id="severity-filter" class="field">
+          <option value="">Tất cả</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option>
+        </select></label>
+        <label><span>Ticket</span><select id="ticket-filter" class="field">
+          <option value="">Tất cả</option><option value="false">Chưa có ticket</option><option value="true">Đã có ticket</option>
+        </select></label>
+      </div>
+
+      <div id="case-results" class="case-results" aria-live="polite"></div>
+
+      <details class="scenario-box">
+        <summary>Kịch bản demo của bài lab</summary>
+        <div id="scenario-list" class="scenario-list"></div>
+      </details>
+    </aside>
+
+    <main class="workspace">
+      <div class="workspace-header">
+        <div><p class="eyebrow">Ask & act</p><h1>Agent Workspace</h1></div>
+        <div id="context-area" class="context-area">
+          <span class="context-label">Context</span>
+          <span id="context-empty" class="context-empty">Chưa chọn test case</span>
+          <span id="context-chip" class="context-chip" hidden></span>
+          <button id="clear-context" class="icon-btn" type="button" aria-label="Bỏ test case khỏi context" hidden>×</button>
+        </div>
+      </div>
+
+      <div id="quick-actions" class="quick-actions" hidden>
+        <button type="button" data-prompt="Tóm tắt trạng thái và lỗi của test case này.">Tóm tắt case</button>
+        <button type="button" data-prompt="Đánh giá test case này có đủ điều kiện tạo phiếu retest hay không. Chưa tạo phiếu.">Đánh giá retest</button>
+        <button type="button" data-prompt="Kiểm tra test case này đã có phiếu retest chưa và báo trạng thái liên quan.">Kiểm tra ticket</button>
+      </div>
+
+      <div id="messages" class="messages" aria-live="polite">
+        <div class="welcome-card">
+          <span class="welcome-icon">⌁</span>
+          <div><strong>Bạn không cần nhớ mã test case.</strong>
+            <p>Tìm bằng mô tả ở Test Case Explorer, chọn một case làm context rồi hỏi Agent. Mỗi lượt chạy sẽ được giải thích trong Agent Map.</p>
+          </div>
+        </div>
+      </div>
+
+      <form id="chat-form" class="composer">
+        <label class="sr-only" for="chat-input">Câu hỏi cho QA Agent</label>
+        <textarea id="chat-input" rows="2" placeholder="Hỏi về test case đang chọn hoặc mô tả lỗi bạn cần tìm…"></textarea>
+        <button type="submit" id="send-btn">Run Agent <span>→</span></button>
+      </form>
+    </main>
+
+    <aside class="panel inspector-panel" aria-label="Agent Inspector">
+      <div class="inspector-tabs" role="tablist">
+        <button class="tab-btn active" type="button" data-tab="map-panel" role="tab">Agent Map</button>
+        <button class="tab-btn" type="button" data-tab="why-panel" role="tab">Why ReAct?</button>
+      </div>
+
+      <section id="map-panel" class="tab-panel active">
+        <div id="run-summary" class="run-summary">
+          <p class="empty-title">Chưa có execution trace</p>
+          <p class="empty-copy">Chạy một câu hỏi để xem Query → Decision → Action → Observation → Final.</p>
+        </div>
+        <div id="agent-map" class="agent-map"></div>
+        <div class="trace-note"><strong>Minh bạch reasoning</strong>
+          <p>“Model response” chỉ hiển thị nội dung công khai thật sự nhận được từ provider. Decision summary là phần diễn giải ngắn phục vụ quan sát, không được coi là chain-of-thought nội bộ.</p>
+        </div>
+      </section>
+
+      <section id="why-panel" class="tab-panel" hidden>
+        <div class="why-hero"><p class="eyebrow">Pattern fit</p><h2>Vì sao ReAct phù hợp?</h2>
+          <p>Giá trị xuất hiện khi bước tiếp theo chỉ có thể quyết định sau khi nhận dữ liệu từ tool.</p>
+        </div>
+        <div class="reason-list">
+          <article><span>01</span><div><strong>Multi-step</strong><p>Tra cứu case trước, sau đó mới đánh giá hoặc tạo ticket.</p></div></article>
+          <article><span>02</span><div><strong>Tool-grounded</strong><p>Thông tin QA và side effect nằm trong backend, không nằm trong kiến thức tĩnh của LLM.</p></div></article>
+          <article><span>03</span><div><strong>Dynamic branch</strong><p>Observation quyết định nhánh: tạo, từ chối, báo trùng hoặc không tìm thấy.</p></div></article>
+          <article><span>04</span><div><strong>Observable</strong><p>Action và Observation tạo bằng chứng để người dùng kiểm tra kết luận.</p></div></article>
+        </div>
+        <div class="boundary-card"><strong>Ranh giới hợp lý</strong>
+          <p>LLM/ReAct hiểu ý định và chọn bước. Backend chịu trách nhiệm eligibility, chống ticket trùng và validation. Với tra cứu đơn giản đã biết mã, workflow trực tiếp có thể phù hợp hơn Agent.</p>
+        </div>
+        <div class="mini-flow" aria-label="Kiến trúc hybrid"><span>User</span><i>→</i><span>ReAct Controller</span><i>→</i><span>QA Tools</span><i>→</i><span>Guardrails</span></div>
+      </section>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -41,6 +41,20 @@ cp config/test_cases.example.json config/test_cases.json
 python src/app.py --all
 ```
 
+### Chạy Web QA ReAct Explorer (prototype)
+
+```bash
+python src/web_ui.py
+```
+
+Mở `http://127.0.0.1:5000`. Bản prototype cung cấp:
+
+- **Test Case Explorer:** tìm case theo mô tả lỗi, mã, platform, status, severity hoặc tình trạng ticket.
+- **Agent Workspace:** chọn một test case làm context rồi đặt câu hỏi mà không phải nhớ/gõ lại mã.
+- **Agent Map:** xem Query → Decision → Action → Observation → Final Answer cùng latency từng bước.
+- **Why ReAct?:** giải thích khi nào ReAct phù hợp và ranh giới giữa Agent, Tool và backend guardrails.
+- **Reasoning transparency:** chỉ hiển thị public reasoning/text thật sự có trong response của provider. Nếu API chỉ trả function call, giao diện hiển thị payload thật và ghi rõ không có public reasoning; `Decision summary` là diễn giải quan sát được, không phải chain-of-thought nội bộ.
+
 **Kỳ vọng Output màn hình:**
 ```text
 ✅ [MOCK OFFLINE MODE PASS]: Môi trường đã sẵn sàng! 
